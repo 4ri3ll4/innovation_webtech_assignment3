@@ -1,0 +1,9 @@
+body { background-color: #e9ecef; }
+.container { background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+h1 { color: #007bff; text-align: center; }
+nav.main-nav { text-align: center; margin-bottom: 20px; }
+nav.main-nav a { margin: 0 10px; color: #007bff; text-decoration: none; font-weight: bold; }
+table { margin-top: 30px; }
+th { background-color: #007bff; color: white; }
+td, th { padding: 12px; text-align: left; }
+tr:nth-child(even) { background-color: #f8f9fa; }
