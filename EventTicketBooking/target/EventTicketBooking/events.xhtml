@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Manage Events - Event Ticket Booking</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" type="text/css" href="#{facesContext.externalContext.requestContextPath}/css/style.css" />
+    <!-- Internal CSS -->
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 950px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: inline-block; width: 140px; }
+        input[type="text"] { padding: 8px; width: 260px; border: 1px solid #ccc; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .message { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .edit-btn { background-color: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+        .delete-btn { background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+        .cancel-btn { background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+        .edit-banner { background-color: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 15px; color: #856404; }
+    </style>
+</h:head>
+<h:body>
+    <div class="container">
+        <nav class="main-nav">
+            <h:link outcome="index" value="Home" /> |
+            <h:link outcome="events" value="Events" /> |
+            <h:link outcome="tickets" value="Tickets" />
+        </nav>
+        <h1>Manage Events</h1>
+
+        <h:panelGroup rendered="#{eventBean.editMode}">
+            <div class="edit-banner">Editing Event #<h:outputText value="#{eventBean.event.id}" /></div>
+        </h:panelGroup>
+
+        <!-- Form with inline CSS -->
+        <h:form style="border: 2px solid #ccc; padding: 15px; border-radius: 5px;">
+            <h:messages layout="table" style="color:red;" globalOnly="false" />
+            <div class="form-group">
+                <label for="evTitle">Title:</label>
+                <h:inputText id="evTitle" value="#{eventBean.event.title}" required="true"
+                             requiredMessage="Event title is required."
+                             style="padding:8px;width:260px;border:1px solid #ccc;border-radius:4px;">
+                    <f:validateLength minimum="3" maximum="150" />
+                    <f:validateRegex pattern="^[A-Za-z0-9 \-:'&amp;]+$" />
+                </h:inputText>
+            </div>
+            <div class="form-group">
+                <label for="evDesc">Description:</label>
+                <h:inputTextarea id="evDesc" value="#{eventBean.event.description}" rows="3" cols="40"
+                                  style="padding:8px;border:1px solid #ccc;border-radius:4px;">
+                    <f:validateLength maximum="1000" />
+                </h:inputTextarea>
+            </div>
+            <div class="form-group">
+                <label for="evDate">Event Date:</label>
+                <h:inputText id="evDate" value="#{eventBean.event.eventDate}" required="true"
+                             requiredMessage="Event date is required."
+                             style="padding:8px;width:200px;border:1px solid #ccc;border-radius:4px;">
+                    <f:convertDateTime pattern="yyyy-MM-dd" type="localDate" />
+                    <f:validator validatorId="notPastDateValidator" />
+                </h:inputText>
+                <small style="color:#666;">Format: yyyy-MM-dd</small>
+            </div>
+            <div class="form-group">
+                <label for="evTime">Start Time:</label>
+                <h:inputText id="evTime" value="#{eventBean.event.startTime}" required="true"
+                             requiredMessage="Start time is required."
+                             style="padding:8px;width:200px;border:1px solid #ccc;border-radius:4px;">
+                    <f:convertDateTime pattern="HH:mm" type="localTime" />
+                </h:inputText>
+                <small style="color:#666;">Format: HH:mm (24-hour)</small>
+            </div>
+            <div class="form-group">
+                <label for="evCategory">Category:</label>
+                <h:selectOneMenu id="evCategory" value="#{eventBean.event.category}" required="true"
+                                  requiredMessage="Please select a category."
+                                  style="padding:8px;width:210px;border:1px solid #ccc;border-radius:4px;">
+                    <f:selectItem itemLabel="-- Select category --" itemValue="" />
+                    <f:selectItem itemLabel="Concert" itemValue="Concert" />
+                    <f:selectItem itemLabel="Conference" itemValue="Conference" />
+                    <f:selectItem itemLabel="Sports" itemValue="Sports" />
+                    <f:selectItem itemLabel="Theater" itemValue="Theater" />
+                    <f:selectItem itemLabel="Other" itemValue="Other" />
+                </h:selectOneMenu>
+            </div>
+            <h:commandButton value="#{eventBean.editMode ? 'Update Event' : 'Create Event'}"
+                             action="#{eventBean.saveEvent}"
+                             style="background-color:#4CAF50;color:white;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;" />
+            <h:commandButton value="Cancel" action="#{eventBean.cancelEdit}" immediate="true"
+                             rendered="#{eventBean.editMode}" styleClass="cancel-btn" />
+        </h:form>
+
+        <h:panelGroup rendered="#{not empty eventBean.message}">
+            <p class="#{eventBean.error ? 'error' : 'message'}">#{eventBean.message}</p>
+        </h:panelGroup>
+
+        <h2>Event List</h2>
+        <h:dataTable value="#{eventBean.events}" var="ev" style="width:100%;border-collapse:collapse;margin-top:20px;" border="1">
+            <h:column><f:facet name="header">ID</f:facet>#{ev.id}</h:column>
+            <h:column><f:facet name="header">Title</f:facet>#{ev.title}</h:column>
+            <h:column>
+                <f:facet name="header">Date</f:facet>
+                <h:outputText value="#{ev.eventDate}">
+                    <f:convertDateTime pattern="yyyy-MM-dd" type="localDate" />
+                </h:outputText>
+            </h:column>
+            <h:column>
+                <f:facet name="header">Time</f:facet>
+                <h:outputText value="#{ev.startTime}">
+                    <f:convertDateTime pattern="HH:mm" type="localTime" />
+                </h:outputText>
+            </h:column>
+            <h:column><f:facet name="header">Category</f:facet>#{ev.category}</h:column>
+            <h:column>
+                <f:facet name="header">Actions</f:facet>
+                <h:form>
+                    <h:commandButton value="Edit" styleClass="edit-btn" immediate="true">
+                        <f:actionListener binding="#{eventBean.editEvent(ev)}" />
+                    </h:commandButton>
+                    <h:commandButton value="Delete" styleClass="delete-btn"
+                                      action="#{eventBean.deleteEvent(ev.id)}"
+                                      onclick="return confirm('Delete this event? Its tickets will also be removed.');" />
+                </h:form>
+            </h:column>
+        </h:dataTable>
+    </div>
+</h:body>
+</html>

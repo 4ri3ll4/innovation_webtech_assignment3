@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+<h:head>
+    <title>Event Ticket Booking System</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" type="text/css" href="#{facesContext.externalContext.requestContextPath}/css/style.css" />
+    <!-- Internal CSS -->
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 60px auto; text-align: center; }
+        .nav-link { display: inline-block; margin: 10px; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; }
+        .nav-link:hover { background-color: #45a049; }
+    </style>
+</h:head>
+<h:body>
+    <div class="container">
+        <h1>Event Ticket Booking System</h1>
+        <!-- Inline CSS -->
+        <p style="color:#666;font-size:14px;">Manage events and their ticket types</p>
+        <h:link outcome="events" value="Manage Events" styleClass="nav-link" />
+        <h:link outcome="tickets" value="Manage Tickets" styleClass="nav-link" />
+    </div>
+</h:body>
+</html>

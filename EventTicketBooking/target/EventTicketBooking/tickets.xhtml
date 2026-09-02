@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Manage Tickets - Event Ticket Booking</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" type="text/css" href="#{facesContext.externalContext.requestContextPath}/css/style.css" />
+    <!-- Internal CSS -->
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 950px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: inline-block; width: 160px; }
+        input[type="text"] { padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .message { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .edit-btn { background-color: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+        .delete-btn { background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+        .cancel-btn { background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+        .edit-banner { background-color: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 15px; color: #856404; }
+    </style>
+</h:head>
+<h:body>
+    <div class="container">
+        <nav class="main-nav">
+            <h:link outcome="index" value="Home" /> |
+            <h:link outcome="events" value="Events" /> |
+            <h:link outcome="tickets" value="Tickets" />
+        </nav>
+        <h1>Manage Tickets</h1>
+
+        <h:panelGroup rendered="#{ticketBean.editMode}">
+            <div class="edit-banner">Editing Ticket #<h:outputText value="#{ticketBean.ticket.id}" /></div>
+        </h:panelGroup>
+
+        <!-- Form with inline CSS -->
+        <h:form style="border: 2px solid #ccc; padding: 15px; border-radius: 5px;">
+            <h:messages layout="table" style="color:red;" globalOnly="false" />
+            <div class="form-group">
+                <label for="tkEvent">Event:</label>
+                <h:selectOneMenu id="tkEvent" value="#{ticketBean.selectedEventId}" required="true"
+                                  requiredMessage="Please select an event."
+                                  style="padding:8px;width:260px;border:1px solid #ccc;border-radius:4px;">
+                    <f:selectItem itemLabel="-- Select event --" itemValue="#{null}" />
+                    <f:selectItems value="#{ticketBean.allEvents}" var="ev" itemValue="#{ev.id}" itemLabel="#{ev.title}" />
+                </h:selectOneMenu>
+            </div>
+            <div class="form-group">
+                <label for="tkType">Ticket Type:</label>
+                <h:inputText id="tkType" value="#{ticketBean.ticket.ticketType}" required="true"
+                             requiredMessage="Ticket type is required."
+                             style="padding:8px;width:220px;border:1px solid #ccc;border-radius:4px;">
+                    <f:validateLength minimum="2" maximum="50" />
+                    <f:validateRegex pattern="^[A-Za-z0-9 \-]+$" />
+                </h:inputText>
+                <small style="color:#666;">e.g. VIP, Regular, Early Bird</small>
+            </div>
+            <div class="form-group">
+                <label for="tkPrice">Price:</label>
+                <h:inputText id="tkPrice" value="#{ticketBean.ticket.price}" required="true"
+                             requiredMessage="Price is required."
+                             style="padding:8px;width:220px;border:1px solid #ccc;border-radius:4px;">
+                    <f:convertNumber type="number" minFractionDigits="2" maxFractionDigits="2" />
+                    <f:validateDoubleRange minimum="0.01" maximum="1000000" />
+                </h:inputText>
+            </div>
+            <div class="form-group">
+                <label for="tkQty">Quantity Available:</label>
+                <h:inputText id="tkQty" value="#{ticketBean.ticket.quantityAvailable}" required="true"
+                             requiredMessage="Quantity is required."
+                             style="padding:8px;width:220px;border:1px solid #ccc;border-radius:4px;">
+                    <f:convertNumber type="number" integerOnly="true" />
+                    <f:validateLongRange minimum="0" maximum="1000000" />
+                </h:inputText>
+            </div>
+            <h:commandButton value="#{ticketBean.editMode ? 'Update Ticket' : 'Create Ticket'}"
+                             action="#{ticketBean.saveTicket}"
+                             style="background-color:#4CAF50;color:white;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;" />
+            <h:commandButton value="Cancel" action="#{ticketBean.cancelEdit}" immediate="true"
+                             rendered="#{ticketBean.editMode}" styleClass="cancel-btn" />
+        </h:form>
+
+        <h:panelGroup rendered="#{not empty ticketBean.message}">
+            <p class="#{ticketBean.error ? 'error' : 'message'}">#{ticketBean.message}</p>
+        </h:panelGroup>
+
+        <h2>Ticket List</h2>
+        <h:dataTable value="#{ticketBean.tickets}" var="tk" style="width:100%;border-collapse:collapse;margin-top:20px;" border="1">
+            <h:column><f:facet name="header">ID</f:facet>#{tk.id}</h:column>
+            <h:column><f:facet name="header">Event</f:facet>#{tk.event.title}</h:column>
+            <h:column><f:facet name="header">Type</f:facet>#{tk.ticketType}</h:column>
+            <h:column><f:facet name="header">Price</f:facet>#{tk.price}</h:column>
+            <h:column><f:facet name="header">Available</f:facet>#{tk.quantityAvailable}</h:column>
+            <h:column>
+                <f:facet name="header">Actions</f:facet>
+                <h:form>
+                    <h:commandButton value="Edit" styleClass="edit-btn" immediate="true">
+                        <f:actionListener binding="#{ticketBean.editTicket(tk)}" />
+                    </h:commandButton>
+                    <h:commandButton value="Delete" styleClass="delete-btn"
+                                      action="#{ticketBean.deleteTicket(tk.id)}"
+                                      onclick="return confirm('Delete this ticket?');" />
+                </h:form>
+            </h:column>
+        </h:dataTable>
+    </div>
+</h:body>
+</html>
